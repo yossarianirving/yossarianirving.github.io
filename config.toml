@@ -6,6 +6,12 @@ theme = "ananke"
 [markup.goldmark.renderer]
 unsafe= true
 
-[[params.ananke_socials]]
-name = "github"
-url = "https://github.com/yossarianirving"
+
+[params.ananke.social.follow]
+new_window_icon = false
+networks = [
+  "github"
+]
+
+[params.ananke.social.github]
+username= "yossarianirving"
