@@ -11,6 +11,8 @@ If the sandwich is rotating clockwise, set the direction to counter-clockwise an
 from that website, upload it to this form, set the correct direction, pick your preferred color, and submit.
 Processing can take some time so be patient.
 
+**Red/Cyan 3-D glasses are required for the effect to work**
+
 <main class="container">
     <form id="gifForm" enctype="multipart/form-data" class="center">
         <div class="mb3">
