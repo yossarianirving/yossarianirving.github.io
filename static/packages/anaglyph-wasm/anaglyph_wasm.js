@@ -1,25 +1,5 @@
 let wasm;
 
-const heap = new Array(128).fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-function getObject(idx) { return heap[idx]; }
-
-let heap_next = heap.length;
-
-function dropObject(idx) {
-    if (idx < 132) return;
-    heap[idx] = heap_next;
-    heap_next = idx;
-}
-
-function takeObject(idx) {
-    const ret = getObject(idx);
-    dropObject(idx);
-    return ret;
-}
-
 const cachedTextDecoder = (typeof TextDecoder !== 'undefined' ? new TextDecoder('utf-8', { ignoreBOM: true, fatal: true }) : { decode: () => { throw Error('TextDecoder not available') } } );
 
 if (typeof TextDecoder !== 'undefined') { cachedTextDecoder.decode(); };
@@ -38,28 +18,21 @@ function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
 }
 
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
+let cachedInt32Memory0 = null;
 
-    heap[idx] = obj;
-    return idx;
+function getInt32Memory0() {
+    if (cachedInt32Memory0 === null || cachedInt32Memory0.byteLength === 0) {
+        cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
+    }
+    return cachedInt32Memory0;
 }
-/**
-*/
-export function init_panic_hook() {
-    wasm.init_panic_hook();
+
+function getArrayU8FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
 }
 
 let WASM_VECTOR_LEN = 0;
-
-function passArray8ToWasm0(arg, malloc) {
-    const ptr = malloc(arg.length * 1, 1) >>> 0;
-    getUint8Memory0().set(arg, ptr / 1);
-    WASM_VECTOR_LEN = arg.length;
-    return ptr;
-}
 
 const cachedTextEncoder = (typeof TextEncoder !== 'undefined' ? new TextEncoder('utf-8') : { encode: () => { throw Error('TextEncoder not available') } } );
 
@@ -119,18 +92,11 @@ function isLikeNone(x) {
     return x === undefined || x === null;
 }
 
-let cachedInt32Memory0 = null;
-
-function getInt32Memory0() {
-    if (cachedInt32Memory0 === null || cachedInt32Memory0.byteLength === 0) {
-        cachedInt32Memory0 = new Int32Array(wasm.memory.buffer);
-    }
-    return cachedInt32Memory0;
-}
-
-function getArrayU8FromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return getUint8Memory0().subarray(ptr / 1, ptr / 1 + len);
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1, 1) >>> 0;
+    getUint8Memory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
 }
 
 const AnaglyphFinalization = (typeof FinalizationRegistry === 'undefined')
@@ -160,11 +126,23 @@ export class Anaglyph {
         wasm.__wbg_anaglyph_free(ptr);
     }
     /**
-    * @returns {Anaglyph}
+    * @returns {number}
     */
-    static new() {
-        const ret = wasm.anaglyph_new();
-        return Anaglyph.__wrap(ret);
+    get_height() {
+        const ret = wasm.__wbg_get_anaglyphresult_width(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+    * @param {string | undefined} anaglyph_type
+    * @param {number} offset_x
+    * @param {number} offset_y
+    * @returns {AnaglyphResult}
+    */
+    to_anaglyph(anaglyph_type, offset_x, offset_y) {
+        var ptr0 = isLikeNone(anaglyph_type) ? 0 : passStringToWasm0(anaglyph_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        var len0 = WASM_VECTOR_LEN;
+        const ret = wasm.anaglyph_to_anaglyph(this.__wbg_ptr, ptr0, len0, offset_x, offset_y);
+        return AnaglyphResult.__wrap(ret);
     }
     /**
     * @param {number} width
@@ -179,6 +157,28 @@ export class Anaglyph {
         return ret !== 0;
     }
     /**
+    * @param {string | undefined} [anaglyph_type]
+    * @param {string | undefined} [video_direction]
+    * @returns {Uint8Array}
+    */
+    gif_to_anaglyph(anaglyph_type, video_direction) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            var ptr0 = isLikeNone(anaglyph_type) ? 0 : passStringToWasm0(anaglyph_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            var len0 = WASM_VECTOR_LEN;
+            var ptr1 = isLikeNone(video_direction) ? 0 : passStringToWasm0(video_direction, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            var len1 = WASM_VECTOR_LEN;
+            wasm.anaglyph_gif_to_anaglyph(retptr, this.__wbg_ptr, ptr0, len0, ptr1, len1);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            var v3 = getArrayU8FromWasm0(r0, r1).slice();
+            wasm.__wbindgen_free(r0, r1 * 1, 1);
+            return v3;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
     * @param {number} width
     * @param {number} height
     * @param {Uint8Array} right_image
@@ -191,20 +191,20 @@ export class Anaglyph {
         return ret !== 0;
     }
     /**
-    * @param {Uint8Array} right_image
-    */
-    set_right_image_raw(right_image) {
-        const ptr0 = passArray8ToWasm0(right_image, wasm.__wbindgen_malloc);
-        const len0 = WASM_VECTOR_LEN;
-        wasm.anaglyph_set_right_image_raw(this.__wbg_ptr, ptr0, len0);
-    }
-    /**
     * @param {Uint8Array} left_image
     */
     set_left_image_raw(left_image) {
         const ptr0 = passArray8ToWasm0(left_image, wasm.__wbindgen_malloc);
         const len0 = WASM_VECTOR_LEN;
         wasm.anaglyph_set_left_image_raw(this.__wbg_ptr, ptr0, len0);
+    }
+    /**
+    * @param {Uint8Array} right_image
+    */
+    set_right_image_raw(right_image) {
+        const ptr0 = passArray8ToWasm0(right_image, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.anaglyph_set_right_image_raw(this.__wbg_ptr, ptr0, len0);
     }
     /**
     * @param {number} width
@@ -219,40 +219,25 @@ export class Anaglyph {
         return ret !== 0;
     }
     /**
-    * @param {string | undefined} anaglyph_type
-    * @param {number} offset_x
-    * @param {number} offset_y
-    * @returns {AnaglyphResult}
+    * @returns {Anaglyph}
     */
-    to_anaglyph(anaglyph_type, offset_x, offset_y) {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            var ptr0 = isLikeNone(anaglyph_type) ? 0 : passStringToWasm0(anaglyph_type, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-            var len0 = WASM_VECTOR_LEN;
-            wasm.anaglyph_to_anaglyph(retptr, this.__wbg_ptr, ptr0, len0, offset_x, offset_y);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var r2 = getInt32Memory0()[retptr / 4 + 2];
-            if (r2) {
-                throw takeObject(r1);
-            }
-            return AnaglyphResult.__wrap(r0);
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
+    static new() {
+        const ret = wasm.anaglyph_new();
+        return Anaglyph.__wrap(ret);
+    }
+    /**
+    * @param {Uint8Array} gif
+    */
+    set_gif(gif) {
+        const ptr0 = passArray8ToWasm0(gif, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.anaglyph_set_gif(this.__wbg_ptr, ptr0, len0);
     }
     /**
     * @returns {number}
     */
     get_width() {
         const ret = wasm.__wbg_get_anaglyphresult_height(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-    * @returns {number}
-    */
-    get_height() {
-        const ret = wasm.__wbg_get_anaglyphresult_width(this.__wbg_ptr);
         return ret >>> 0;
     }
 }
@@ -284,6 +269,22 @@ export class AnaglyphResult {
         wasm.__wbg_anaglyphresult_free(ptr);
     }
     /**
+    * @returns {Uint8Array}
+    */
+    get_image() {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.anaglyphresult_get_image(retptr, this.__wbg_ptr);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            var v1 = getArrayU8FromWasm0(r0, r1).slice();
+            wasm.__wbindgen_free(r0, r1 * 1, 1);
+            return v1;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
     * @returns {number}
     */
     get height() {
@@ -308,22 +309,6 @@ export class AnaglyphResult {
     */
     set width(arg0) {
         wasm.__wbg_set_anaglyphresult_width(this.__wbg_ptr, arg0);
-    }
-    /**
-    * @returns {Uint8Array}
-    */
-    get_image() {
-        try {
-            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
-            wasm.anaglyphresult_get_image(retptr, this.__wbg_ptr);
-            var r0 = getInt32Memory0()[retptr / 4 + 0];
-            var r1 = getInt32Memory0()[retptr / 4 + 1];
-            var v1 = getArrayU8FromWasm0(r0, r1).slice();
-            wasm.__wbindgen_free(r0, r1 * 1, 1);
-            return v1;
-        } finally {
-            wasm.__wbindgen_add_to_stack_pointer(16);
-        }
     }
 }
 
@@ -361,40 +346,11 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
-    };
-    imports.wbg.__wbg_new_abda76e883ba8a5f = function() {
-        const ret = new Error();
-        return addHeapObject(ret);
-    };
-    imports.wbg.__wbg_stack_658279fe44541cf6 = function(arg0, arg1) {
-        const ret = getObject(arg1).stack;
-        const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
-        getInt32Memory0()[arg0 / 4 + 1] = len1;
-        getInt32Memory0()[arg0 / 4 + 0] = ptr1;
-    };
-    imports.wbg.__wbg_error_f851667af71bcfc6 = function(arg0, arg1) {
-        let deferred0_0;
-        let deferred0_1;
-        try {
-            deferred0_0 = arg0;
-            deferred0_1 = arg1;
-            console.error(getStringFromWasm0(arg0, arg1));
-        } finally {
-            wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
-        }
-    };
     imports.wbg.__wbg_time_2c9ba8df2c0b364e = function(arg0, arg1) {
         console.time(getStringFromWasm0(arg0, arg1));
     };
     imports.wbg.__wbg_timeEnd_d6fcb4eac2e76fb9 = function(arg0, arg1) {
         console.timeEnd(getStringFromWasm0(arg0, arg1));
-    };
-    imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
-        const ret = getStringFromWasm0(arg0, arg1);
-        return addHeapObject(ret);
     };
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
