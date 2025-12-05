@@ -1,7 +1,7 @@
 ---
 title: "Hosting Update 2025"
-date: 2025-11-22T14:31:39-05:00
-draft: true
+date: 2025-12-05T14:31:39-05:00
+draft: false
 ---
 
 
@@ -9,20 +9,25 @@ It's been almost a year since I restarted my self-hosting journey, and I finally
 
 ## Hardware
 
+{{< figure src="/images/server.webp" caption="My server rack in my basement containing all my self hosting hardware">}}
+
 Currently, I'm using the following hardware to host my services:
 
 * Asrock DeskMini X300 w/ Ryzen 3400G 4-core/4-thread CPU, 16GB ram, and 1TB md-RAID 1 SSD storage AKA DeskMini
 * GMKTec M5+ Mini PC w/ Ryzen 5825U 8-core/16-thread CPU, 32GB ram, and 1TB md-RAID 1 NVME m.2 storage AKA ProxMox
 * Synology 920+ NAS w/ 4x4TB HD in md-RAID5 equivalent AKA NAS.
 * Home Assistant Yellow w/ PI CM4 4GB, and 500GB m.2 NVME storage
+* Gaming PC w/ Ryzen 5800XT 8-core/16-thread CPU, 32GB ram, Nvidia 3080 GPU, and 5TB total NVME m.2 Storage AKA Streaming
 
 First, the NAS is my primary storage server, where I store all my photos, documents, backups, and music. The only self-contained services it provides are Synology's photo/video backup solution and a wiki that I mainly use for storing recipes. It is also the backup target for the three other servers. The NAS itself backs up to Synology's cloud storage and an off-site NAS at my parents' house. While it can be a competent self-hosting platform, I try to keep it more as an appliance.
 
-Next, the DeskMini has been playing a diminishing role in my setup. While its processing power and RAM are sufficient for pretty much all my needs, the single network port has limited its usefulness. I use multiple VLANs and firewall rules on my pfSense router to isolate groups of devices and services for security. While it is possible to configure the single port to be VLAN aware, it isn't worth the risk of misconfiguration. It runs Debian 12 with Portainer, which is a container management solution.
+The Streaming PC is a gaming PC running Bazzite that acts as a personal "cloud gaming server." It does not run continuously and is instead turned on via a Wake-On-Lan packet. It contains the most powerful GPU out of my four gaming capable computers and since it resides in the basement, I can crank the fans without worrying about noise.
 
-The Home Assistant box runs Home Assistant in the untrusted IoT network.
+Next, the DeskMini has been playing a diminishing role in my setup. While its processing power and RAM are sufficient for pretty much all my needs, the single network port has limited its usefulness. I use multiple VLANs and firewall rules on my pfSense router to isolate groups of devices and services for security. While it is possible to configure the single port to be VLAN aware, it isn't worth the risk of misconfiguration. It runs Debian 12 with Portainer, which is a container management solution.
 
-Finally, the GMKTec is a Proxmox server that runs everything else. While more than powerful enough for 99% of self-hosting needs, the dual network ports make this server the most versatile machine I have. The first network port is used for the management interface and a few services, while the second is VLAN-aware.  This allows containers and VMs to run in whichever VLAN I need.
+The Home Assistant Yellow box runs Home Assistant in the untrusted IoT network.
+
+Finally, the GMKTec is a Proxmox server that runs everything else. While more than powerful enough for 99% of self-hosting needs, the dual network ports make this server the most versatile machine I have. The first network port is used for the management interface and a few services, while the second is VLAN-aware.  This allows containers and VMs to run in whichever VLAN I need.
 
 
 ## Access
@@ -37,7 +42,7 @@ Typically, having multiple services for external access would unnecessarily comp
 
 ### DNS
 
-While accessing services on my local network (or through the full tunnel VPN), DNS is straightforward. There is an entry in my pfSense DNS resolver that points any request to *.internal.topher.ward to the IP address of my Caddy reverse proxy. When connecting using Tailscale, things are a bit more interesting. Tailscale nodes are typically assigned private IP addresses in the 100.0.0.0/8 range. Instead of forcing all DNS requests through my Tailscale network, I added a public A record that resolves *.internal.topher.ward to the private Tailscale IP address of the Caddy reverse proxy. 
+While accessing services on my local network (or through the full tunnel VPN), DNS is straightforward. There is an entry in my pfSense DNS resolver that points any request to *.internal.topher.ward to the IP address of my Caddy reverse proxy. When connecting using Tailscale, things are a bit more interesting. Tailscale nodes are typically assigned private IP addresses in the 100.0.0.0/8 range. Instead of forcing all DNS requests through my Tailscale network, I added a public A record that resolves *.internal.topher.ward to the private Tailscale IP address of the Caddy reverse proxy.
 
 ## Services
 
@@ -53,7 +58,7 @@ Below are the services I have running that are in regular use:
 * LibreSpeed
 * Gist
 * Upsnap
-* Sunshine "Cloud" Game Streaming
+* Sunshine for "Cloud" Game Streaming
 * Restic Rest Server
 * Wireguard VPN
 * pfBlocker-NG
