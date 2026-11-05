@@ -2,6 +2,7 @@ baseURL = 'https://chris.topherward.com'
 languageCode = 'en-us'
 title = 'Christopher Ward'
 theme = "ananke"
+enableRobotsTXT = true
 
 [markup.goldmark.renderer]
 unsafe= true
