@@ -12,3 +12,6 @@ Credit for the original GIFs: [Rotating Sandwiches](https://rotatingsandwiches.c
 
 
 {{< figure src="/images/3dhogie.gif" >}}
+
+
+{{< figure src="/images/3dle.gif" >}}
