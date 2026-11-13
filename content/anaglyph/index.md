@@ -2,9 +2,9 @@
 title: "Anaglyph Demo"
 date: 2024-04-18T15:49:40-04:00
 draft: false
-menu:
-  main:
-    weight: 1
+# menu:
+#   main:
+#     weight: 1
 ---
 
 This is a demo of my anaglyph-rs library compiled to WebAssembly. Add the left and right images to their respective fields, adjust the x and y offsets and hit submit.
