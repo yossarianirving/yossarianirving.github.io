@@ -97,7 +97,8 @@ body.anaglyph-tool #sharing{display:none}
     The two auto direction options are there depending on how tight the shot is (assuming you are using a 360 video booth).
     Otherwise, you can manually set the direction based on the movement of the camera. Under advanced options there are
     the two pipelines which should be set to a reasonable default, but switching may result in a much faster or much slower render.
-    I wouldn't recommend touching the checkboxes, those are mostly for my testing.
+    I wouldn't recommend touching the checkboxes, those are mostly for my testing. This tool is for non-commercial use only unless
+    otherwise stated.
 </p>
 
 <div id="caps" class="alert alert-secondary mb3">
